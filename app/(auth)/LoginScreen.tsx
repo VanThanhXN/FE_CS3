@@ -1,5 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import React, { useState } from "react";
+
 import {
   Image,
   StyleSheet,
@@ -72,7 +74,7 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.linkButton}
-          onPress={() => router.push("/(auth)/RegisterScreen")}
+          onPress={() => router.replace("/(auth)/RegisterScreen")}
         >
           <Text style={styles.linkText}>Chưa có tài khoản? Đăng ký ngay</Text>
         </TouchableOpacity>

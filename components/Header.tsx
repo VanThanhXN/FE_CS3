@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Image,
@@ -10,8 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
+import { useUser } from "../hooks/useUser"; // Thêm import này
 
 interface HeaderProps {
   title?: string;
@@ -30,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const navigation = useNavigation();
   const { cart } = useCart();
-  const { user } = useAuth();
+  const { user } = useUser(); // Sử dụng useUser thay vì useAuth
   const [searchVisible, setSearchVisible] = useState(false);
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const primaryColor = "#FF7F33";
@@ -54,11 +55,29 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleCartPress = () => {
-    navigation.navigate("Cart");
+    router.push("/(tabs)/cart");
   };
 
   const handleProfilePress = () => {
-    navigation.navigate("Profile");
+    router.push("/(tabs)/profile");
+  };
+
+  // Hàm render avatar hoặc placeholder
+  const renderAvatar = () => {
+    if (user?.avatar) {
+      return (
+        <Image
+          source={{ uri: user.avatar }}
+          style={styles.avatar}
+          resizeMode="cover"
+        />
+      );
+    }
+    return (
+      <View style={styles.avatarPlaceholder}>
+        <Ionicons name="person" size={20} color={primaryColor} />
+      </View>
+    );
   };
 
   return (
@@ -72,14 +91,9 @@ const Header: React.FC<HeaderProps> = ({
           >
             <Ionicons name="arrow-back" size={24} color={primaryColor} />
           </TouchableOpacity>
-        ) : showAvatar && user ? (
+        ) : showAvatar ? (
           <TouchableOpacity onPress={handleProfilePress}>
-            <Image
-              source={{
-                uri: user.avatarUrl || "https://i.imgur.com/TbWI8VX.png",
-              }}
-              style={styles.avatar}
-            />
+            {renderAvatar()}
           </TouchableOpacity>
         ) : (
           <View style={styles.placeholder} />
@@ -225,15 +239,25 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  avatarPlaceholder: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: "#E0E0E0",
   },
   placeholder: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
   },
 });
 

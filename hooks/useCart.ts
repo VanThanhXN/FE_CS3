@@ -1,3 +1,4 @@
+// hooks/useCart.ts
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { CartService } from "../service/cart/cartService";
@@ -36,14 +37,12 @@ export const useCart = () => {
   const [error, setError] = useState<Error | null>(null);
   const [updatingItems, setUpdatingItems] = useState<number[]>([]);
 
-  // Hàm fetchCart với retry mechanism
   const fetchCart = async (retryCount = 0): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
       const response: CartResponse = await CartService.getCart();
 
-      // Validate response
       if (!response.result || !Array.isArray(response.result.items)) {
         throw new Error("Invalid cart data structure");
       }
@@ -55,8 +54,6 @@ export const useCart = () => {
       });
     } catch (err) {
       setError(err as Error);
-
-      // Auto-retry up to 3 times
       if (retryCount < 3) {
         setTimeout(() => fetchCart(retryCount + 1), 1000 * (retryCount + 1));
       } else {
@@ -67,7 +64,6 @@ export const useCart = () => {
     }
   };
 
-  // Hàm thêm vào giỏ hàng với optimistic update
   const addToCart = async (
     productId: number,
     quantity: number = 1
@@ -91,7 +87,7 @@ export const useCart = () => {
             : [
                 ...prev.items,
                 {
-                  cartId: Date.now(), // Temporary ID
+                  cartId: Date.now(),
                   productId,
                   productName: "Loading...",
                   productImage: "",
@@ -107,19 +103,21 @@ export const useCart = () => {
       });
 
       const response = await CartService.addToCart(productId, quantity);
-      setCart(response.result);
+
+      // Sau khi thêm thành công, fetch lại giỏ hàng từ server
+      await fetchCart();
+
       return response;
     } catch (err) {
       setError(err as Error);
       // Revert optimistic update on error
-      fetchCart();
+      await fetchCart();
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Hàm cập nhật số lượng với transaction state
   const updateCartItem = async (
     cartId: number,
     quantity: number
@@ -141,11 +139,11 @@ export const useCart = () => {
       }));
 
       const response = await CartService.updateCartItem(cartId, quantity);
-      setCart(response.result);
+      await fetchCart(); // Fetch lại sau khi cập nhật
       return response;
     } catch (err) {
       setError(err as Error);
-      fetchCart(); // Revert to server state on error
+      await fetchCart();
       throw err;
     } finally {
       setLoading(false);
@@ -153,7 +151,6 @@ export const useCart = () => {
     }
   };
 
-  // Hàm xóa item với confirmation dialog
   const removeCartItem = async (cartId: number): Promise<CartResponse> => {
     try {
       setLoading(true);
@@ -165,18 +162,17 @@ export const useCart = () => {
       }));
 
       const response = await CartService.removeCartItem(cartId);
-      setCart(response.result);
+      await fetchCart(); // Fetch lại sau khi xóa
       return response;
     } catch (err) {
       setError(err as Error);
-      fetchCart(); // Revert to server state on error
+      await fetchCart();
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Hàm clear cart với confirmation
   const clearCart = async (): Promise<CartResponse> => {
     try {
       setLoading(true);
@@ -189,18 +185,17 @@ export const useCart = () => {
       });
 
       const response = await CartService.clearCart();
-      setCart(response.result);
+      await fetchCart(); // Fetch lại sau khi xóa toàn bộ
       return response;
     } catch (err) {
       setError(err as Error);
-      fetchCart(); // Revert to server state on error
+      await fetchCart();
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Effect để fetch cart khi component mount
   useEffect(() => {
     fetchCart();
   }, []);
@@ -217,3 +212,4 @@ export const useCart = () => {
     clearCart,
   };
 };
+export default useCart;

@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Dimensions,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,6 +18,10 @@ interface CategoryListProps {
   onSelectCategory: (categoryId: string | number) => void;
 }
 
+const { width } = Dimensions.get("window");
+const ITEM_PADDING = 12;
+const ITEM_MARGIN = 8;
+
 const CategoryList: React.FC<CategoryListProps> = ({
   categories,
   selectedCategory,
@@ -28,29 +33,39 @@ const CategoryList: React.FC<CategoryListProps> = ({
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.container}
+        decelerationRate="fast"
+        snapToInterval={width * 0.4} // Snap item width + margin
       >
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category.categoryId}
-            style={[
-              styles.categoryItem,
-              selectedCategory === category.categoryId &&
-                styles.selectedCategory,
-            ]}
-            onPress={() => onSelectCategory(category.categoryId)}
-            activeOpacity={0.8}
-          >
-            <Text
+        {categories.map((category) => {
+          const isSelected = selectedCategory === category.categoryId;
+
+          return (
+            <TouchableOpacity
+              key={category.categoryId}
               style={[
-                styles.categoryName,
-                selectedCategory === category.categoryId &&
-                  styles.selectedCategoryName,
+                styles.categoryItem,
+                isSelected && styles.selectedCategory,
+                {
+                  shadowColor: isSelected ? "#FF7F33" : "#000",
+                },
               ]}
+              onPress={() => onSelectCategory(category.categoryId)}
+              activeOpacity={0.7}
             >
-              {category.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.categoryName,
+                  isSelected && styles.selectedCategoryName,
+                ]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {category.name}
+              </Text>
+              {isSelected && <View style={styles.activeIndicator} />}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -58,34 +73,54 @@ const CategoryList: React.FC<CategoryListProps> = ({
 
 const styles = StyleSheet.create({
   wrapper: {
-    paddingTop: 8,
-    backgroundColor: "#fff",
+    paddingVertical: 12,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#F0F0F0",
   },
   container: {
     paddingHorizontal: 16,
+    alignItems: "center",
   },
   categoryItem: {
-    paddingHorizontal: 18,
+    minWidth: width * 0.3,
+    paddingHorizontal: ITEM_PADDING,
     paddingVertical: 10,
-    backgroundColor: "#EDEDED",
-    borderRadius: 25,
-    marginRight: 10,
-    shadowColor: "#000",
+    backgroundColor: "#F8F8F8",
+    borderRadius: 20,
+    marginHorizontal: ITEM_MARGIN / 2,
+    justifyContent: "center",
+    alignItems: "center",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 4,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
   },
   selectedCategory: {
     backgroundColor: "#FF7F33",
+    borderColor: "#FF7F33",
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   categoryName: {
-    color: "#333",
+    color: "#555",
     fontWeight: "600",
     fontSize: 14,
+    textAlign: "center",
   },
   selectedCategoryName: {
-    color: "#fff",
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+  activeIndicator: {
+    position: "absolute",
+    bottom: -8,
+    width: 20,
+    height: 3,
+    backgroundColor: "#FF7F33",
+    borderRadius: 2,
   },
 });
 

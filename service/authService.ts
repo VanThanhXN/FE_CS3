@@ -33,4 +33,22 @@ export const AuthService = {
     }
     return response.data;
   },
+  getMe: async () => {
+    const response = await apiClient.get("/auth/me");
+    return response.data;
+  },
+  updateAvatar: async (
+    formData: FormData
+  ): Promise<{ code: number; result: User }> => {
+    const response = await apiClient.put(
+      UserEndpoints.UPDATE_AVATAR,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
 };

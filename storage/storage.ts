@@ -2,16 +2,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TOKEN_KEY = "auth_token";
 
-export const storeToken = async (token: string | null) => {
+export const storeToken = async (token: string) => {
   try {
-    if (token) {
-      await AsyncStorage.setItem(TOKEN_KEY, token);
-    } else {
-      await clearToken(); // Gọi clearToken nếu token là null
-    }
+    await AsyncStorage.setItem(TOKEN_KEY, token);
   } catch (error) {
     console.error("Lỗi khi lưu token:", error);
-    throw error; // Ném lỗi để xử lý ở nơi gọi
   }
 };
 

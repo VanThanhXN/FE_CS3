@@ -25,3 +25,10 @@ export const CartEndpoints = {
   REMOVE_CART_ITEM: `${API_BASE_URL}/cart/remove`,
   CLEAR_CART: `${API_BASE_URL}/cart/clear`,
 };
+
+export const UserEndpoints = {
+  GET_USER_INFO: "/auth/me",
+  UPDATE_AVATAR: "/auth/me/avatar",
+  UPDATE_PROFILE: "/auth/me",
+  CHANGE_PASSWORD: "/auth/change-password",
+};
